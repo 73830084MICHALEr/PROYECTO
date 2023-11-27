@@ -32,7 +32,9 @@ class VisualizadorDatos:
         return conteo
 
     def generar_grafica(self, conteo, titulo):
-        figura = px.bar(conteo, x='Ubicacion', y='Count', title=titulo)
+        figura = px.bar(conteo, x='Ubicacion', y='Count', title=titulo, labels={'Ubicacion': 'Ubicación', 'Count': 'Cantidad'})
+        figura.update_traces(marker_color='cyan', marker_line_color='darkblue', marker_line_width=2, opacity=0.8)
+        figura.update_layout(title_text=titulo, title_x=0.5, xaxis_title='Ubicación', yaxis_title='Cantidad', template='plotly_dark')
         return figura
 
     def mostrar_grafica(self, figura):
@@ -52,8 +54,15 @@ class VisualizadorDatos:
 
 
 def main():
+    st.set_page_config(
+        page_title="Proyecto PA",
+        page_icon="🌐",
+        layout="wide"
+    )
+    st.markdown("<h1 style='text-align: center; color: #38b6ff;'>Áreas Naturales Protegidas (ANP) de Administración Nacional Definitiva </h1>", unsafe_allow_html=True)
+
     # Título de la aplicación Streamlit
-    st.markdown("# GRAFICA DE DATOS ")
+
 
     # Crear una instancia de la clase VisualizadorDatos y cargar el archivo CSV
     visualizador = VisualizadorDatos("archivo.csv")
@@ -88,6 +97,12 @@ def main():
     fig_provincia = visualizador.generar_grafica(conteo_provincia, "Conteo por Provincia")
     fig_distrito = visualizador.generar_grafica(conteo_distrito, "Conteo por Distrito")
 
+    # Personalizar los estilos de las gráficas
+    fig_anp_cate.update_traces(marker_color='#2ecc71', marker_line_color='rgb(8,48,107)', marker_line_width=1.5)
+    fig_departamento.update_traces(marker_color='#3498db', marker_line_color='rgb(8,48,107)', marker_line_width=1.5)
+    fig_provincia.update_traces(marker_color='#9b59b6', marker_line_color='rgb(8,48,107)', marker_line_width=1.5)
+    fig_distrito.update_traces(marker_color='#e74c3c', marker_line_color='rgb(8,48,107)', marker_line_width=1.5)
+
     # Unir los datos de coordenadas con los datos de Ubigeos utilizando el código UBIGEO1
     merged_data = pd.merge(visualizador.data, visualizador.data_ubigeos, how="left", left_on="UBIGEO1",
                            right_on="ubigeo_inei")
@@ -102,19 +117,27 @@ def main():
     # Generar el mapa de Ubigeos
     mapa_ubigeos = visualizador.generar_mapa_ubigeos(gdf)
 
+
     # Mostrar el mapa de Ubigeos en la aplicación Streamlit
-    st.markdown("## **Mapa de Ubigeos**")
+    st.markdown("## Mapa de Ubigeos")
     folium_static(mapa_ubigeos)
+    st.markdown("## Gráficas")
 
-    # Mostrar las gráficas en la aplicación Streamlit
-    visualizador.mostrar_grafica(fig_anp_cate)
-    visualizador.mostrar_grafica(fig_departamento)
-    visualizador.mostrar_grafica(fig_provincia)
-    visualizador.mostrar_grafica(fig_distrito)
+    st.plotly_chart(fig_anp_cate)
+    st.code("python\nst.plotly_chart(fig_anp_cate)\n")
 
-    # Agregar la gráfica de barras al final
+    st.plotly_chart(fig_departamento)
+    st.code("python\nst.plotly_chart(fig_departamento)\n")
+
+    st.plotly_chart(fig_provincia)
+    st.code("python\nst.plotly_chart(fig_provincia)\n")
+
+    st.plotly_chart(fig_distrito)
+    st.code("python\nst.plotly_chart(fig_distrito)\n")
+
+        
      # Gráfica de barras adicional
-    st.markdown("## **Superficies de las Áreas**")
+    st.markdown("## *Superficies de las Áreas*")
     data_barras = {
         'Área Natural Protegida': ['Chancaybaños', 'Santiago Comaina', 'Cordillera Huayhuash', 'Sierra del Divisor', 'Río Nieva', 'Bosque de Zárate', 'Reserva Paisajística Cerro Khapia', 'Ancón'],
         'Superficie (ha)': [2628, 398449.44, 67589.76, 62234.62, 36348.3, 545.75, 18313.79, 2193.01]
