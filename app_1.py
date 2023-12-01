@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import geopandas as gpd
 from streamlit_folium import folium_static
 import folium
